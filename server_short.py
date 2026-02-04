@@ -4,7 +4,7 @@ from aiohttp import web
 from sqlalchemy.exc import IntegrityError
 
 from auth import hash_password
-from db import Session, User, close_orm, init_orm
+from db import Session, Adv, User, close_orm, init_orm
 
 app = web.Application()
 
@@ -35,58 +35,62 @@ def get_error(error_class, message):
     )
 
 
-async def add_user(session: Session, user: User):
+async def add_record(session: Session, record: Adv):
     try:
-        session.add(user)
+        session.add(record)
         await session.commit()
     except IntegrityError as err:
-        raise get_error(web.HTTPConflict, {"error": "user already exists"})
+        raise get_error(web.HTTPConflict, {"error": "record already exists"})
 
 
-class UserView(web.View):
+class AdvView(web.View):
 
     @property
-    def user_id(self):
-        return int(self.request.match_info["user_id"])
+    def record_id(self):
+        return int(self.request.match_info["record_id"])
 
     @property
     def session(self) -> Session:
         return self.request.session
 
-    async def get_user(self):
-        user = await self.session.get(User, self.user_id)
-        if user is None:
-            raise get_error(web.HTTPNotFound, "user not found")
-        return user
+    async def get_record(self):
+        record = await self.session.get(Adv, self.record_id)
+        if record is None:
+            raise get_error(web.HTTPNotFound, "record not found")
+        return record
 
     async def get(self):
-        user = await self.get_user()
-        return web.json_response(user.dict)
+        record = await self.get_record()
+        return web.json_response(record.dict())
 
     async def post(self):
         json_data = await self.request.json()
 
-        user = User(
-            name=json_data["name"], password=hash_password(json_data["password"])
+        record = Adv(
+            title=json_data["title"], descr=json_data["descr"],\
+            owner=json_data["owner"], status=json_data["status"]
         )
-        await add_user(self.session, user)
-        return web.json_response(user.id_dict)
+        await add_record(self.session, record)
+        return web.json_response(record.id_dict)
 
     async def patch(self):
-        user = await self.get_user()
-        user_data = await self.request.json()
+        record = await self.get_record()
+        json_data = await self.request.json()
 
-        if "name" in user_data:
-            user.name = user_data["name"]
-        if "password" in user_data:
-            user.password = hash_password(user_data["password"])
-        await add_user(self.session, user)
+        if "owner" in json_data:
+                record.owner = json_data["owner"]
+        if "title" in json_data:
+            record.title = json_data["title"]
+        if "descr" in json_data:
+            record.descr = json_data["descr"]
+        await add_record(self.session, record)
 
-        return web.json_response(user.id_dict)
+        return web.json_response(record.id_dict)
 
     async def delete(self):
-        user = await self.get_user()
-        await self.session.delete(user)
+        record = await self.get_record()
+        record.status = "deleted"
+        #await self.session.delete(record)
         await self.session.commit()
         return web.json_response({"status": "deleted"})
 
@@ -108,10 +112,10 @@ async def hello_world(request: web.Request):
 app.add_routes(
     [
         web.post(r"/hello/world/{some_id:\d+}", hello_world),
-        web.post("/v1/users", UserView),
-        web.get(r"/v1/users/{user_id:\d+}", UserView),
-        web.patch(r"/v1/users/{user_id:\d+}", UserView),
-        web.delete(r"/v1/users/{user_id:\d+}", UserView),
+        web.post("/v1/records", AdvView),
+        web.get(r"/v1/records/{record_id:\d+}", AdvView),
+        web.patch(r"/v1/records/{record_id:\d+}", AdvView),
+        web.delete(r"/v1/records/{record_id:\d+}", AdvView),
     ]
 )
 

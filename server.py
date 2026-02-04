@@ -20,7 +20,7 @@ app.cleanup_ctx.append(orm_context)
 
 
 class AdvView(web.View):
-    async def get(self, record_id: int):
+    async def get(self):
         record_id = int(self.request.match_info["record_id"])
         async with Session() as session:
             record = await session.get(Adv, record_id)
@@ -48,7 +48,7 @@ class AdvView(web.View):
 
             return web.json_response(record.dict())
 
-    async def patch(self, record_id: int):
+    async def patch(self):
         record_id = int(self.request.match_info["record_id"])
         json_data = await self.request.json()
         async with Session() as session:
@@ -58,6 +58,8 @@ class AdvView(web.View):
                     text=json.dumps({"error": "record not found"}),
                     content_type="application/json",
                 )
+            if "owner" in json_data:
+                record.owner = json_data["owner"]
             if "title" in json_data:
                 record.title = json_data["title"]
             if "descr" in json_data:
@@ -73,7 +75,7 @@ class AdvView(web.View):
                 )
             return web.json_response(record.dict())
 
-    async def delete(self, record_id: int):
+    async def delete(self):
         record_id = int(self.request.match_info["record_id"])
         async with Session() as session:
             record = await session.get(Adv, record_id)
@@ -82,8 +84,9 @@ class AdvView(web.View):
                     text=json.dumps({"error": "record not found"}),
                     content_type="application/json",
                 )
-            await session.delete(Adv)
-            #await session.add(record)
+            record.status = "deleted"
+            session.add(record)
+            #await session.delete(record)
             await session.commit()
             return web.json_response({"status": "deleted"})
 
@@ -107,8 +110,8 @@ app.add_routes(
         web.post(r"/hello/world/{some_id:\d+}", hello_world),
         web.post("/v1/records", AdvView),
         web.get(r"/v1/records/{record_id:\d+}", AdvView),
-        web.patch("/v1/records/<int:record_id>", AdvView),
-        web.delete("/v1/records/<int:record_id>", AdvView),
+        web.patch(r"/v1/records/{record_id:\d+}", AdvView),
+        web.delete(r"/v1/records/{record_id:\d+}", AdvView),
     ]
 )
 

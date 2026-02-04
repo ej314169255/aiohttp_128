@@ -36,7 +36,7 @@ class Adv(Base):
     owner: MappedColumn[str] = mapped_column(String)
     title: MappedColumn[str] = mapped_column(String)
     descr: MappedColumn[str] = mapped_column(String, unique=True)
-    status: MappedColumn[str] = mapped_column(String[25])
+    status: MappedColumn[str] = mapped_column(String)
     create_time: MappedColumn[datetime.datetime] = mapped_column(
         DateTime, server_default=func.now()
         )
@@ -44,7 +44,8 @@ class Adv(Base):
     def dict(self):
         return {
             "id": self.id,
-            "descr": self.title,
+            "owner": self.owner,
+            "descr": self.descr,
             "create_time": int(self.create_time.timestamp()),
         }
 
