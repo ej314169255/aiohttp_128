@@ -16,14 +16,32 @@ async def main():
         #     print(await response.text())
 
 
+        # response = await session.post(
+        #     "http://127.0.0.1:8080/k2/records",
+        #     json={"name": "Big Mazzy", "password": "tutufor1", "token": "token_1"}
+
+        # )
+        # print(response.status)
+        # print(await response.json())
+
+        # response = await session.post(
+        #     "http://127.0.0.1:8080/v1/register",
+        #     json={"title": "sh", "descr": "deep woods_53", \
+        #     "owner": "Big Mazzy", "status": "Mazzynio"}
+
+        # )
+        # print(response.status)
+        # print(await response.json())
+
         response = await session.post(
-            "http://127.0.0.1:8080/v1/records",
-            json={"title": "shoes", "descr": "deep woods", "owner": "big Mazzy", "status": "empty"}
+            "http://127.0.0.1:8080/v1/login",
+            json={"title": "sh", "descr": "deep woods_53", \
+            "owner": "Big Mazzy", "status": "Mazzynio"}
 
         )
         print(response.status)
         print(await response.json())
-        
+
                 
         # async with session.get(
         #     'http://127.0.0.1:8080/v1/records/1'
@@ -39,8 +57,8 @@ async def main():
         # print(response.status)
         # print(await response.json())
 
-        # response = await session.patch("http://127.0.0.1:8080/v1/records/1", json={
-        #     "owner": "little mouse", "title": "snikers", "descr": "jumping"
+        # response = await session.patch("http://127.0.0.1:8080/k2/records/5", json={
+        #     "name": "python"
         # })
         # print(response.status)
         # print(await response.json())

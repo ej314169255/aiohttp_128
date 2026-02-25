@@ -33,6 +33,7 @@ class Adv(Base):
     __tablename__= "records"
 
     id: MappedColumn[int] = mapped_column(Integer, primary_key=True)
+    # adv_id: MappedColumn[int] = mapped_column(Integer, ForeignKey("users.id"))
     owner: MappedColumn[str] = mapped_column(String)
     title: MappedColumn[str] = mapped_column(String)
     descr: MappedColumn[str] = mapped_column(String)
@@ -57,7 +58,7 @@ class User(Base):
     id: MappedColumn[int] = mapped_column(Integer, primary_key=True)
     name: MappedColumn[str] = mapped_column(String, unique=True, index=True, nullable=False)
     password: MappedColumn[str] = mapped_column(String(70), nullable=False)
-    #token: MappedColumn[str] = relationship("Token", back_populates="user", cascade="all, delete-orphan", lazy="joined")
+    token: MappedColumn[str] = mapped_column(String, unique=True)
     registration_time: MappedColumn[datetime.datetime] = mapped_column(
         DateTime, server_default=func.now()
     )
@@ -71,7 +72,7 @@ class User(Base):
         }
 
 class Token(Base):
-    __tablename__="token"
+    __tablename__="tokens"
     id: MappedColumn[int] = mapped_column(Integer, primary_key=True)
     token: MappedColumn[str] = mapped_column(String, unique=True)
     registration_time: MappedColumn[datetime.datetime] = mapped_column(DateTime, server_default=func.now())
