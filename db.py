@@ -3,7 +3,7 @@ import os
 
 from sqlalchemy import DateTime, Integer, String, func, ForeignKey
 from sqlalchemy.ext.asyncio import AsyncAttrs, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import DeclarativeBase, MappedColumn, mapped_column
+from sqlalchemy.orm import DeclarativeBase, MappedColumn, mapped_column, relationship
 
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "secret")
 POSTGRES_USER = os.getenv("POSTGRES_USER", "app")
@@ -31,10 +31,9 @@ class Base(DeclarativeBase, AsyncAttrs):
 
 class Adv(Base):
     __tablename__= "records"
-
     id: MappedColumn[int] = mapped_column(Integer, primary_key=True)
-    # adv_id: MappedColumn[int] = mapped_column(Integer, ForeignKey("users.id"))
-    owner: MappedColumn[str] = mapped_column(String)
+    user_id: MappedColumn[int] = mapped_column(Integer, ForeignKey("users.id"))
+    user: MappedColumn["User"] = relationship("User", back_populates="adv")
     title: MappedColumn[str] = mapped_column(String)
     descr: MappedColumn[str] = mapped_column(String)
     status: MappedColumn[str] = mapped_column(String)
@@ -50,8 +49,6 @@ class Adv(Base):
             "registration_time": int(self.registration_time.timestamp()),
         }
 
-
-
 class User(Base):
 
     __tablename__ = "users"
@@ -59,6 +56,7 @@ class User(Base):
     name: MappedColumn[str] = mapped_column(String, unique=True, index=True, nullable=False)
     password: MappedColumn[str] = mapped_column(String(70), nullable=False)
     token: MappedColumn[str] = mapped_column(String, unique=True)
+    adv: MappedColumn["Adv"] = relationship("Adv", back_populates="user", lazy="joined")
     registration_time: MappedColumn[datetime.datetime] = mapped_column(
         DateTime, server_default=func.now()
     )
@@ -68,6 +66,8 @@ class User(Base):
         return {
             "id": self.id,
             "name": self.name,
+            "password": self.password,
+            "token": self.token,
             "registration_time": int(self.registration_time.timestamp()),
         }
 
@@ -77,8 +77,7 @@ class Token(Base):
     token: MappedColumn[str] = mapped_column(String, unique=True)
     registration_time: MappedColumn[datetime.datetime] = mapped_column(DateTime, server_default=func.now())
     token_id: MappedColumn[int] = mapped_column(Integer, ForeignKey("users.id"))
-    #user: MappedColumn[User] = relationship(User, back_populates="token", lazy="joined")
-
+    
     
 async def init_orm():
     async with engine.begin() as conn:

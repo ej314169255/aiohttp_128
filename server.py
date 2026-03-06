@@ -1,4 +1,4 @@
-import json, jwt
+import json, jwt, os
 
 from aiohttp import web
 from sqlalchemy.exc import IntegrityError
@@ -34,7 +34,7 @@ class AdvView(web.View):
                     text=json.dumps({"error": "record not found"}),
                     content_type="application/json",
                 )
-            return web.json_response(record.dict())
+            return web.json_response(record.dict)
 
     async def post(self):
         json_data = await self.request.json()
@@ -52,7 +52,7 @@ class AdvView(web.View):
                     text=json.dumps(message), content_type="application/json"
                 )
 
-            return web.json_response(record.dict())
+            return web.json_response(record.dict)
 
     async def patch(self):
         record_id = int(self.request.match_info["record_id"])
@@ -79,7 +79,7 @@ class AdvView(web.View):
                 raise web.HTTPConflict(
                     text=json.dumps(message), content_type="application/json"
                 )
-            return web.json_response(record.dict())
+            return web.json_response(record.dict)
 
     async def delete(self):
         record_id = int(self.request.match_info["record_id"])
@@ -142,10 +142,8 @@ async def login(request: web.Request):
             )
         if (check(json_data["password"], record.dict["password"])):
             encoded = jwt.encode({"user_id": record.dict["id"]}, private_key, algorithm="ES256")
-            param = {"encoded": encoded, "public_key": public_key}
-            print(f(param))
-            q = json.dumps({"encoded": encoded})
-        return web.json_response(q)
+            return web.json_response(json.dumps({"encoded": encoded}))
+        return web.json_response({"result": "password incorrect"})
 
 
 app.add_routes(

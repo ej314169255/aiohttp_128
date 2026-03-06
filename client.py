@@ -9,7 +9,7 @@ async def main():
         # async with session.post(
         #     'http://127.0.0.1:8080/hello/world/42?key1=val1&key2=val2',
         #     json={"some": "data"},
-        #     headers={"Authorisation": "token"}
+        #     headers={"Authorisation": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.n7Uw2hjWCO0xAPKnTOohWbleRb7k0fFBfu46RrEMUseZp5JSKnudxtT0-Q3FO7YJ17suciiWxccWdxVqkCoCdw"}
         
         # ) as response:
         #     print(response.status)
@@ -18,7 +18,7 @@ async def main():
 
         # response = await session.post(
         #     "http://127.0.0.1:8080/k2/records",
-        #     json={"name": "Big Mazzy", "password": "tutufor1", "token": "token_1"}
+        #     json={"name": "Mazzy_1", "password": "tutufor1", "token": "token_1"}
 
         # )
         # print(response.status)
@@ -33,14 +33,21 @@ async def main():
         # print(response.status)
         # print(await response.json())
 
-        response = await session.post(
-            "http://127.0.0.1:8080/v1/login",
-            json={"title": "sh", "descr": "deep woods_53", \
-            "owner": "Big Mazzy", "status": "Mazzynio"}
+        # response = await session.get(
+        #     "http://127.0.0.1:8080/v1/login/1",
+        #     json={"name": "Big Mazzy", "password": "tutufor1", \
+        #     "owner": "Big Mazzy", "status": "Mazzynio"}
 
-        )
-        print(response.status)
-        print(await response.json())
+        # )
+        # print(response.status)
+        # print(await response.json())
+
+        async with session.post(
+            'http://127.0.0.1:8080/v1/login/1', json={"password": "tutufor1"}
+
+        ) as response:
+            print(response.status)
+            print(await response.json())
 
                 
         # async with session.get(

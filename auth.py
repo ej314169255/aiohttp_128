@@ -45,13 +45,13 @@ def f(param):
         print(f"I am {name}")
 
     payload = {"exp": datetime.now(tz=timezone.utc) + timedelta(seconds=600)}
-    token = jwt.encode(payload, "secret")
+    token = jwt.encode(payload, "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.UQTkMKKNAifk1KjjApRFLUBx3q_fwYyS5usX")
     time.sleep(3)
     # JWT payload is now expired
     # But with some leeway, it will still validate
 
     try:
-        decoded = jwt.decode(token, "secret", leeway=1, algorithms=["HS256"])
+        decoded = jwt.decode(token, "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.UQTkMKKNAifk1KjjApRFLUBx3q_fwYyS5usX", leeway=1, algorithms=["HS256"])
         print(f"decoded {decoded}")
         # payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
     except ExpiredSignatureError:
