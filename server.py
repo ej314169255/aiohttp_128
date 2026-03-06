@@ -4,7 +4,7 @@ from aiohttp import web
 from sqlalchemy.exc import IntegrityError
 
 from db import Session, Adv, User, close_orm, init_orm
-from auth import hash, check
+from auth import hash, check, decorator, f
 
 app = web.Application()
 
@@ -125,27 +125,22 @@ async def register(request: web.Request):
 
     return web.json_response(record.dict())
 
-#    return web.json_response({"hell0": "black bag"})
+#    return web.json_response({"hello": "black bag"})
 
 async def login(request: web.Request):
-
-    record_id = int(self.request.match_info["record_id"])
+    json_data = await request.json()
+    record_id = int(request.match_info["user_id"])
     async with Session() as session:
-        record = await session.get(Adv, record_id)
+        record = await session.get(User, record_id)
         if record is None:
             raise web.HTTPNotFound(
                 text=json.dumps({"error": "record not found"}),
                 content_type="application/json",
-                )
-            return web.json_response(record.dict())
-    json_data = await request.json()
-    print(json_data)
-    async with Session() as session:
-
-        people = User(name=json_data["owner"])
-        print(f"{people}")
-
-    return web.json_response({"hell0": "black bag"})
+            )
+        if (check(json_data["password"], record.dict["password"])):
+            par = {"some": "payload", "iss": "urn:fo5o"}
+            print(f(par))
+        return web.json_response(record.dict)
 
 
 app.add_routes(
@@ -156,7 +151,7 @@ app.add_routes(
         web.patch(r"/v1/records/{record_id:\d+}", AdvView),
         web.delete(r"/v1/records/{record_id:\d+}", AdvView),
         web.post("/v1/register", register),
-        web.post("/v1/login", login),
+        web.post(r"/v1/login/{user_id:\d+}", login),
     ]
 )
 
