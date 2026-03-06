@@ -6,7 +6,6 @@ from datetime import timezone, datetime, timedelta
 
 from jwt.exceptions import ExpiredSignatureError, DecodeError
 
-# ... (define SECRET_KEY, algorithms, and token)
 
 def hash(password: str):
 
@@ -34,14 +33,12 @@ def decorator(additional_parametr):
     return wrapper
 
 @decorator(datetime.now())
-def f(par):
-    payload = par#{"som": "payloadd", "som2": "payload", "som2": "payloadd5", "som5": "payl5oad", "iss": "urn:fo5o"}
-    salt = bcrypt.gensalt()
-    token = jwt.encode(payload, salt)
-    print(token)
-    print(f"salt: {salt}")
+def f(param):
+    public_key = param["public_key"]
+    encoded = param["encoded"]
+    
     try:
-        print(jwt.decode(token, salt, issuer="urn:fo5o", algorithms=["HS256"]))
+        print(jwt.decode(encoded, public_key, algorithms=["ES256"]))
     except jwt.InvalidIssuerError:
         print("invalid issuer")
         print("Hello World")
@@ -68,7 +65,7 @@ def f(par):
     except Exception as e:
     # Handle any other potential exceptions
         print(f"An unexpected error occurred: {e}")
-    return par
+    return param
 
 
 # name = f({"some": "payload", "iss": "urn:fo5o"})

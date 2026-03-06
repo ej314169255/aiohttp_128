@@ -1,10 +1,14 @@
-import json
+import json, jwt
 
 from aiohttp import web
 from sqlalchemy.exc import IntegrityError
 
 from db import Session, Adv, User, close_orm, init_orm
 from auth import hash, check, decorator, f
+
+
+private_key = b"-----BEGIN EC PRIVATE KEY-----\nMHcCAQEEIHAhM7P6HG3LgkDvgvfDeaMA6uELj+jEKWsSeOpS/SfYoAoGCCqGSM49\nAwEHoUQDQgAEXHVxB7s5SR7I9cWwry/JkECIRekaCwG3uOLCYbw5gVzn4dRmwMyY\nUJFcQWuFSfECRK+uQOOXD0YSEucBq0p5tA==\n-----END EC PRIVATE KEY-----\n"
+public_key = b"-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEXHVxB7s5SR7I9cWwry/JkECIReka\nCwG3uOLCYbw5gVzn4dRmwMyYUJFcQWuFSfECRK+uQOOXD0YSEucBq0p5tA==\n-----END PUBLIC KEY-----\n"
 
 app = web.Application()
 
@@ -123,9 +127,8 @@ async def register(request: web.Request):
                  text=json.dumps(message), content_type="application/json"
                  )
 
-    return web.json_response(record.dict())
+    return web.json_response(record.dict)
 
-#    return web.json_response({"hello": "black bag"})
 
 async def login(request: web.Request):
     json_data = await request.json()
@@ -138,9 +141,11 @@ async def login(request: web.Request):
                 content_type="application/json",
             )
         if (check(json_data["password"], record.dict["password"])):
-            par = {"some": "payload", "iss": "urn:fo5o"}
-            print(f(par))
-        return web.json_response(record.dict)
+            encoded = jwt.encode({"user_id": record.dict["id"]}, private_key, algorithm="ES256")
+            param = {"encoded": encoded, "public_key": public_key}
+            print(f(param))
+            q = json.dumps({"encoded": encoded})
+        return web.json_response(q)
 
 
 app.add_routes(
